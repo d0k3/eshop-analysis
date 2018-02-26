@@ -97,3 +97,11 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# Output files
+*.xml
+*.json
+*.csv
+
+# Certificates
+*.pem

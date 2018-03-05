@@ -12,7 +12,7 @@ This script will scrape the Nintendo 3DS eShops for all available regions (> 200
 # How to run
 Just run the script via `py -3 eat.py` (or `python3 eat.py` on unix). To include information about titlkeys into the results __(highly recommended)__, add `-t [TITLEKEYURL]` or `--titlekeyurl [TITLEKEYURL]`, whereas `[TITLEKEYURL]` is the URL (with 'http//') of _that titlekeys site_. If you don't want to do this every time, you may also edit `titlekeyurl` in the source code, it's right at the top.
 
-You may also limit the scope of analysed regions via `-r [REGION]` or `-- region=[REGION]`, whereas `[REGION]` is `english`, `main` or the two letter country code of a specific region. Resulting CSV files will be written to the `results` subdirectory, intermediate dumps will be written to the `dumped` subdirectory.
+You may also limit the scope of analysed regions via `-r [REGION]` or `--region=[REGION]`, whereas `[REGION]` is `english`, `main` or the two letter country code of a specific region. Resulting CSV files will be written to the `results` subdirectory, intermediate dumps will be written to the `dumped` subdirectory.
 
 # Credits
 I actually learnt Python writing this script, and doing so wouldn't have been possible with @ihaveamac's help. @ihaveamac also started this by providing the eShop parser function. Thanks a gigaton!

@@ -36,8 +36,8 @@ langs_all = ('US', 'GB', 'AU', 'JP', 'ES', 'DE', 'IT', 'FR', 'NL', 'AX', 'AF', '
 
 region_id_pref = {'A' : 0, 'P' : 1, 'E' : 2, 'J' : 3, 'S' : 4, 'D' : 5, 'F' : 6, 'I' : 7, 'H' : 8, 'R' : 9, 'W' : 10, 'K' : 11, 'V' : 12, 'X' : 13, 'Y' : 14, 'Z' : 15 }
 
-merged_eshop_elements: List[ElementTree.Element] = []
-db_release_elements: List[ElementTree.Element] = []
+merged_eshop_elements = []
+db_release_elements = []
 enctitlekeydb_data = []
 
 

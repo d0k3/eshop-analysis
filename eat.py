@@ -19,6 +19,7 @@ resultdest = 'results'
 
 csv_eshop_analysis = resultdest + '/' + 'eshop_analysis_all_in_one.csv'
 csv_3dsdb_releases = resultdest + '/' + '3dsdb_releases.csv'
+csv_unique_downloads = resultdest + '/' + 'unique_download_titles.csv'
 csv_missing_3dsdb_from_eshop = resultdest + '/' + 'missing_3dsdb_from_eshop.csv'
 csv_missing_retail_dumps_no_download = resultdest + '/' + 'missing_retail_dumps_no_download.csv'
 csv_missing_downloads_only_retail = resultdest + '/' + 'missing_downloads_only_retail.csv'
@@ -26,12 +27,14 @@ csv_missing_titlekeys = resultdest + '/' + 'missing_titlekeys.csv'
 csv_missing_archive_eshop = resultdest + '/' + 'missing_archive_eshop.csv'
 csv_missing_archive_all = resultdest + '/' + 'missing_archive_all.csv'
 
-csv_fieldnames_eshop = ['product_code', 'region_id', 'name', 'publisher', 'publisher_id', 'genre', 'release_eshop', 'release_retail', 'eshop_regions', 'score', 'votes', 'titlekey_known', '3dsdb_id', 'alternative_download', 'alternative_with_titlekey']
-csv_fieldnames_3dsdb = ['title_id', 'product_code', 'region_id', 'name', 'publisher', 'region', 'languages', '3dsdb_id', 'alternative_download', 'alternative_with_titlekey']
+csv_fieldnames_eshop = ['product_code', 'region_id', 'name', 'publisher', 'publisher_id', 'genre', 'release_eshop', 'release_retail', 'eshop_regions', 'score', 'votes', 'titlekey_known', '3dsdb_id', 'alternative_download', 'alternative_with_titlekey', 'best_alternative']
+csv_fieldnames_3dsdb = ['title_id', 'product_code', 'region_id', 'name', 'publisher', 'region', 'languages', '3dsdb_id', 'alternative_download', 'alternative_with_titlekey', 'best_alternative']
 
 langs_english = ('US', 'GB', 'AU')
 langs_main = ('US', 'GB', 'AU', 'JP', 'ES', 'DE', 'IT', 'FR', 'NL', 'KR', 'TW', 'HK')
 langs_all = ('US', 'GB', 'AU', 'JP', 'ES', 'DE', 'IT', 'FR', 'NL', 'AX', 'AF', 'AL', 'DZ', 'AS', 'AD', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BY', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BA', 'BW', 'BV', 'BR', 'IO', 'BN', 'BG', 'BF', 'BI', 'KH', 'CM', 'CA', 'CV', 'KY', 'CF', 'TD', 'CL', 'CN', 'CX', 'CC', 'CO', 'KM', 'CD', 'CG', 'CK', 'CR', 'CI', 'HR', 'CU', 'CY', 'CZ', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'ET', 'FK', 'FO', 'FJ', 'FI', 'GF', 'PF', 'TF', 'GA', 'GM', 'GE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GP', 'GU', 'GT', 'GN', 'GW', 'GY', 'HT', 'HM', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IR', 'IQ', 'IE', 'IL', 'JM', 'JO', 'KZ', 'KE', 'KI', 'KP', 'KR', 'KW', 'KG', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MO', 'MK', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MQ', 'MR', 'MU', 'YT', 'MX', 'FM', 'MD', 'MC', 'MN', 'MS', 'MA', 'MZ', 'MM', 'NA', 'NR', 'NP', 'AN', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'RW', 'SH', 'KN', 'LC', 'PM', 'VC', 'WS', 'SM', 'ST', 'SA', 'SN', 'CS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'LK', 'SD', 'SR', 'SJ', 'SZ', 'SE', 'CH', 'SY', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'AE', 'UM', 'UY', 'UZ', 'VU', 'VA', 'VE', 'VN', 'VG', 'VI', 'WF', 'EH', 'YE', 'ZM', 'ZW')
+
+region_id_pref = {'A' : 0, 'P' : 1, 'E' : 2, 'J' : 3, 'S' : 4, 'D' : 5, 'F' : 6, 'I' : 7, 'H' : 8, 'R' : 9, 'W' : 10, 'K' : 11, 'V' : 12, 'X' : 13, 'Y' : 14, 'Z' : 15 }
 
 merged_eshop_elements: List[ElementTree.Element] = []
 db_release_elements: List[ElementTree.Element] = []
@@ -244,7 +247,7 @@ def get_enctitlekeydb_data():
 
     url = titlekeyurl + '/json_enc'
     with requests.get(url) as r:
-        out = dumpdest + '/titlkeydb.json'
+        out = dumpdest + '/titlekeydb.json'
         with open(out, 'wb') as f:
             f.write(r.content)
         enctitlekeydb_data = r.json()
@@ -291,6 +294,15 @@ def analyse_3dsdb(english_only):
                     if ttk is not None:
                         eshop_alt_ttk.append(pc)
 
+            best_alt = ''
+            ba_pref = region_id_pref[rid]
+            if ba_pref is not None:
+                for a in eshop_alt:
+                    ba_pref0 = region_id_pref[a[9:10]]
+                    if ba_pref0 is not None and ba_pref0 < ba_pref:
+                        ba_pref = ba_pref0
+                        best_alt = a
+
             title_id = rl.find('titleid').text
             region = rl.find('region').text
             lang = rl.find('languages').text
@@ -299,9 +311,9 @@ def analyse_3dsdb(english_only):
             dbid = rl.find('id').text
 
             if not found:
-                mdw.writerow({'title_id': title_id, 'product_code': pc_p, 'region_id': rid, 'name': name, 'publisher': pub, 'region': region, 'languages': lang, '3dsdb_id': dbid, 'alternative_download': ' / '.join(eshop_alt), 'alternative_with_titlekey': ' / '.join(eshop_alt_ttk)})
+                mdw.writerow({'title_id': title_id, 'product_code': pc_p, 'region_id': rid, 'name': name, 'publisher': pub, 'region': region, 'languages': lang, '3dsdb_id': dbid, 'alternative_download': ' / '.join(eshop_alt), 'alternative_with_titlekey': ' / '.join(eshop_alt_ttk), 'best_alternative': best_alt})
                 count_missing += 1
-            dbw.writerow({'title_id': title_id, 'product_code': pc_p, 'region_id': rid, 'name': name, 'publisher': pub, 'region': region, 'languages': lang, '3dsdb_id': dbid, 'alternative_download': ' / '.join(eshop_alt), 'alternative_with_titlekey': ' / '.join(eshop_alt_ttk)})
+            dbw.writerow({'title_id': title_id, 'product_code': pc_p, 'region_id': rid, 'name': name, 'publisher': pub, 'region': region, 'languages': lang, '3dsdb_id': dbid, 'alternative_download': ' / '.join(eshop_alt), 'alternative_with_titlekey': ' / '.join(eshop_alt_ttk), 'best_alternative': best_alt})
 
         print('Adding missing entries from 3dsdb.com: ' + str(count_missing) + ' / ' + str(count_all) + ' entries', end = '\n')
 
@@ -376,7 +388,16 @@ def build_eshop_analysis():
                     if ttk0 is not None:
                         eshop_alt_ttk.append(pc0)
 
-            eaw.writerow({'product_code': pc, 'region_id': rid, 'name': name, 'publisher': pub_name, 'publisher_id': pub_id, 'genre': genre, 'release_eshop': rel_e, 'release_retail': rel_r, 'eshop_regions': '/'.join(eshop_regs), 'score': score, 'votes': votes, 'titlekey_known': titlekey_known, '3dsdb_id': dbid, 'alternative_download': ' / '.join(eshop_alt), 'alternative_with_titlekey': ' / '.join(eshop_alt_ttk)})
+            best_alt = ''
+            ba_pref = region_id_pref[rid]
+            if ba_pref is not None:
+                for a in eshop_alt:
+                    ba_pref0 = region_id_pref[a[9:10]]
+                    if ba_pref0 is not None and ba_pref0 < ba_pref:
+                        ba_pref = ba_pref0
+                        best_alt = a
+
+            eaw.writerow({'product_code': pc, 'region_id': rid, 'name': name, 'publisher': pub_name, 'publisher_id': pub_id, 'genre': genre, 'release_eshop': rel_e, 'release_retail': rel_r, 'eshop_regions': '/'.join(eshop_regs), 'score': score, 'votes': votes, 'titlekey_known': titlekey_known, '3dsdb_id': dbid, 'alternative_download': ' / '.join(eshop_alt), 'alternative_with_titlekey': ' / '.join(eshop_alt_ttk), 'best_alternative': best_alt})
             count_ok += 1
 
         # append data from 3DSDB
@@ -384,7 +405,7 @@ def build_eshop_analysis():
             mdr = csv.DictReader(md_csv)
             for r in mdr:
                 print('Merging all entries: ' + str(count_ok) + ' / ' + str(count_all) + ' entries', end = '\r')
-                eaw.writerow({'product_code': r['product_code'], 'region_id': r['region_id'], 'name': r['name'], 'publisher': r['publisher'], 'release_retail': '3DSDB', '3dsdb_id': r['3dsdb_id'], 'alternative_download': r['alternative_download'], 'alternative_with_titlekey': r['alternative_with_titlekey']})
+                eaw.writerow({'product_code': r['product_code'], 'region_id': r['region_id'], 'name': r['name'], 'publisher': r['publisher'], 'release_retail': '3DSDB', '3dsdb_id': r['3dsdb_id'], 'alternative_download': r['alternative_download'], 'alternative_with_titlekey': r['alternative_with_titlekey'], 'best_alternative': r['best_alternative']})
                 count_ok += 1
                 count_all += 1
 
@@ -392,19 +413,22 @@ def build_eshop_analysis():
 
 
 def analyse_missing():
-    with open(csv_eshop_analysis, 'r', encoding='utf-8') as ea_csv, open(csv_missing_retail_dumps_no_download, 'w', encoding='utf-8') as mrd_csv, open(csv_missing_downloads_only_retail, 'w', encoding='utf-8') as mdr_csv, open(csv_missing_titlekeys, 'w', encoding='utf-8') as mtk_csv, open(csv_missing_archive_eshop, 'w', encoding='utf-8') as mfe_csv, open(csv_missing_archive_all, 'w', encoding='utf-8') as mfa_csv:
+    with open(csv_eshop_analysis, 'r', encoding='utf-8') as ea_csv, open(csv_missing_retail_dumps_no_download, 'w', encoding='utf-8') as mrd_csv, open(csv_missing_downloads_only_retail, 'w', encoding='utf-8') as mdr_csv, open(csv_missing_titlekeys, 'w', encoding='utf-8') as mtk_csv, open(csv_missing_archive_eshop, 'w', encoding='utf-8') as mfe_csv, open(csv_missing_archive_all, 'w', encoding='utf-8') as mfa_csv, open(csv_unique_downloads, 'w', encoding='utf-8') as ud_csv:
         ear = csv.DictReader(ea_csv)
+        udw = csv.DictWriter(ud_csv, fieldnames=csv_fieldnames_eshop, lineterminator='\n')
         mrdw = csv.DictWriter(mrd_csv, fieldnames=csv_fieldnames_eshop, lineterminator='\n')
         mdrw = csv.DictWriter(mdr_csv, fieldnames=csv_fieldnames_eshop, lineterminator='\n')
         mtkw = csv.DictWriter(mtk_csv, fieldnames=csv_fieldnames_eshop, lineterminator='\n')
         mfew = csv.DictWriter(mfe_csv, fieldnames=csv_fieldnames_eshop, lineterminator='\n')
         mfaw = csv.DictWriter(mfa_csv, fieldnames=csv_fieldnames_eshop, lineterminator='\n')
+        udw.writeheader()
         mrdw.writeheader()
         mdrw.writeheader()
         mtkw.writeheader()
         mfew.writeheader()
         mfaw.writeheader()
 
+        n_unique_downloads = 0
         m_retail_dumps = 0
         m_downloads = 0
         m_downloads_alt = 0
@@ -414,13 +438,18 @@ def analyse_missing():
         count_all = 0
 
         for r in ear:
+            is_unique = r['best_alternative'] is None or r['best_alternative'] == ''
             has_download = r['release_eshop'] is not None and r['release_eshop'] != ''
-            has_titlekey = r['titlekey_known'] is not None and r['titlekey_known'] != ''
+            has_titlekey = r['titlekey_known'] is not None and r['titlekey_known'] == 'true'
             has_cartdump = r['3dsdb_id'] is not None and r['3dsdb_id'] != ''
             has_alt = r['alternative_download'] is not None and r['alternative_download'] != ''
             has_alt_ttk = r['alternative_with_titlekey'] is not None and r['alternative_with_titlekey'] != ''
 
             print('Deeper analysis: ' + str(count_all) + ' entries', end = '\r')
+
+            if has_download and is_unique:
+                n_unique_downloads += 1
+                udw.writerow(r)
 
             if not has_download and not has_cartdump:
                 m_retail_dumps += 1
@@ -454,6 +483,7 @@ def analyse_missing():
         print('--------------------------------')
 
         print('Total titles processed         :', str(count_all))
+        print('Unique download titles         :', str(n_unique_downloads))
         if titlekeyurl:
             print('Titles with missing titlekeys  :', str(m_titlekey))
         print('Titles with no downloads       :', str(m_downloads))

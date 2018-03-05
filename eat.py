@@ -13,6 +13,7 @@ from typing import List
 
 titlekeyurl = None 
 urlbase = 'https://samurai.ctr.shop.nintendo.net/samurai/ws/{lang}/titles?offset={offs}'
+# urlbase = 'https://samurai.ctr.eshop.nintendo.net/samurai/ws/{lang}/contents?shop_id=1&limit={limit}&offset={offs}'
 
 dumpdest = 'dumped'
 resultdest = 'results'
@@ -27,12 +28,14 @@ csv_missing_titlekeys = resultdest + '/' + 'missing_titlekeys.csv'
 csv_missing_archive_eshop = resultdest + '/' + 'missing_archive_eshop.csv'
 csv_missing_archive_all = resultdest + '/' + 'missing_archive_all.csv'
 
-csv_fieldnames_eshop = ['product_code', 'region_id', 'name', 'publisher', 'publisher_id', 'genre', 'release_eshop', 'release_retail', 'eshop_regions', 'score', 'votes', 'titlekey_known', '3dsdb_id', 'alternative_download', 'alternative_with_titlekey', 'best_alternative']
+csv_fieldnames_eshop = ['product_code', 'region_id', 'name', 'publisher', 'publisher_id', 'platform', 'genre', 'release_eshop', 'release_retail', 'eshop_regions', 'score', 'votes', 'titlekey_known', '3dsdb_id', 'alternative_download', 'alternative_with_titlekey', 'best_alternative']
 csv_fieldnames_3dsdb = ['title_id', 'product_code', 'region_id', 'name', 'publisher', 'region', 'languages', '3dsdb_id', 'alternative_download', 'alternative_with_titlekey', 'best_alternative']
 
 langs_english = ('US', 'GB', 'AU')
 langs_main = ('US', 'GB', 'AU', 'JP', 'ES', 'DE', 'IT', 'FR', 'NL', 'KR', 'TW', 'HK')
 langs_all = ('US', 'GB', 'AU', 'JP', 'ES', 'DE', 'IT', 'FR', 'NL', 'AX', 'AF', 'AL', 'DZ', 'AS', 'AD', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BY', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BA', 'BW', 'BV', 'BR', 'IO', 'BN', 'BG', 'BF', 'BI', 'KH', 'CM', 'CA', 'CV', 'KY', 'CF', 'TD', 'CL', 'CN', 'CX', 'CC', 'CO', 'KM', 'CD', 'CG', 'CK', 'CR', 'CI', 'HR', 'CU', 'CY', 'CZ', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'ET', 'FK', 'FO', 'FJ', 'FI', 'GF', 'PF', 'TF', 'GA', 'GM', 'GE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GP', 'GU', 'GT', 'GN', 'GW', 'GY', 'HT', 'HM', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IR', 'IQ', 'IE', 'IL', 'JM', 'JO', 'KZ', 'KE', 'KI', 'KP', 'KR', 'KW', 'KG', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MO', 'MK', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MQ', 'MR', 'MU', 'YT', 'MX', 'FM', 'MD', 'MC', 'MN', 'MS', 'MA', 'MZ', 'MM', 'NA', 'NR', 'NP', 'AN', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'RW', 'SH', 'KN', 'LC', 'PM', 'VC', 'WS', 'SM', 'ST', 'SA', 'SN', 'CS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'LK', 'SD', 'SR', 'SJ', 'SZ', 'SE', 'CH', 'SY', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'AE', 'UM', 'UY', 'UZ', 'VU', 'VA', 'VE', 'VN', 'VG', 'VI', 'WF', 'EH', 'YE', 'ZM', 'ZW')
+
+platform_dict = {'18' : 'Nintendo 3DS Retail Only', '19' : 'Nintendo 3DS Download Only', '20' : 'Nintendo DSiWare', '21' : 'Nintendo Game Boy', '22' : 'Nintendo Game Boy Color', '23' : 'Nintendo Game Boy Advance', '24' : 'NES', '25' : 'Game Gear', '26' : 'Turbografx', '43' : 'Downloadable Video', '63' : 'Nintendo 3DS Software Update', '83' : 'Nintendo 3DS Software Update (JP)', '103' : 'Nintendo 3DS Retail/Download', '1001' : 'New 3DS Download Only', '1002' : 'New 3DS Retail/Download', '1003' : 'New 3DS Software Update', '1004' : 'Super Nintendo'}
 
 region_id_pref = {'A' : 0, 'P' : 1, 'E' : 2, 'J' : 3, 'S' : 4, 'D' : 5, 'F' : 6, 'I' : 7, 'H' : 8, 'R' : 9, 'W' : 10, 'K' : 11, 'V' : 12, 'X' : 13, 'Y' : 14, 'Z' : 15 }
 
@@ -189,7 +192,10 @@ def get_eshop_content():
 
                     # clean up and add elements from the contents root to the title_elements lists
                     for cn in contents_root:
-                        pc = cn.find('title').find('product_code').text
+                        tt = cn.find('title')
+                        if tt is None:
+                            continue
+                        pc = tt.find('product_code').text
                         if not pc.startswith(('CTR-', 'KTR-')):
                             continue
                         title_elements.append(cn)
@@ -350,6 +356,7 @@ def build_eshop_analysis():
 
             pc = tt.find('product_code').text
             rid = pc[9:10]
+            pid = tt.find('platform').get('id')
             name = tt.find('name').text
             genre = tt.find('display_genre').text
             pub_name = pub.find('name').text
@@ -410,7 +417,11 @@ def build_eshop_analysis():
                         ba_pref = ba_pref0
                         best_alt = a
 
-            eaw.writerow({'product_code': pc, 'region_id': rid, 'name': name, 'publisher': pub_name, 'publisher_id': pub_id, 'genre': genre, 'release_eshop': rel_e, 'release_retail': rel_r, 'eshop_regions': '/'.join(eshop_regs), 'score': score, 'votes': votes, 'titlekey_known': titlekey_known, '3dsdb_id': dbid, 'alternative_download': ' / '.join(eshop_alt), 'alternative_with_titlekey': ' / '.join(eshop_alt_ttk), 'best_alternative': best_alt})
+            platform = platform_dict[pid]
+            if platform is None:
+                platform = ''
+
+            eaw.writerow({'product_code': pc, 'region_id': rid, 'name': name, 'publisher': pub_name, 'publisher_id': pub_id, 'platform': platform, 'genre': genre, 'release_eshop': rel_e, 'release_retail': rel_r, 'eshop_regions': '/'.join(eshop_regs), 'score': score, 'votes': votes, 'titlekey_known': titlekey_known, '3dsdb_id': dbid, 'alternative_download': ' / '.join(eshop_alt), 'alternative_with_titlekey': ' / '.join(eshop_alt_ttk), 'best_alternative': best_alt})
             count_ok += 1
 
         # append data from 3DSDB
@@ -418,7 +429,7 @@ def build_eshop_analysis():
             mdr = csv.DictReader(md_csv)
             for r in mdr:
                 print('Merging all entries: ' + str(count_ok) + ' / ' + str(count_all) + ' entries', end = '\r')
-                eaw.writerow({'product_code': r['product_code'], 'region_id': r['region_id'], 'name': r['name'], 'publisher': r['publisher'], 'release_retail': '3DSDB', '3dsdb_id': r['3dsdb_id'], 'alternative_download': r['alternative_download'], 'alternative_with_titlekey': r['alternative_with_titlekey'], 'best_alternative': r['best_alternative']})
+                eaw.writerow({'product_code': r['product_code'], 'region_id': r['region_id'], 'name': r['name'], 'publisher': r['publisher'], 'platform': platform_dict['18'], 'release_retail': '3DSDB', '3dsdb_id': r['3dsdb_id'], 'alternative_download': r['alternative_download'], 'alternative_with_titlekey': r['alternative_with_titlekey'], 'best_alternative': r['best_alternative']})
                 count_ok += 1
                 count_all += 1
 

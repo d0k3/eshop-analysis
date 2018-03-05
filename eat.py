@@ -225,6 +225,8 @@ def get_3dsdb_content():
         count_all = 0
         count_ok = 0
         for rl in el:
+            print('Loading 3DSDB cart data: ' + str(count_ok) + ' / ' + str(count_all) + ' entries', end = '\r')
+
             count_all += 1
             type = rl.find('type').text
             serial = rl.find('serial').text
@@ -235,6 +237,17 @@ def get_3dsdb_content():
                 continue
             if type != '1':
                 continue
+
+            dup = False
+            for rl0 in el:
+                if rl is rl0:
+                    break
+                elif serial == rl0.find('serial').text:
+                    dup = True
+                    break
+            if dup:
+                continue
+
             db_release_elements.append(rl)
             count_ok += 1
 

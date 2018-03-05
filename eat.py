@@ -50,7 +50,7 @@ def write_eshop_content(el, out):
     el.sort(key=lambda x: int(x.get('index')))
 
     # generate merged XML
-    merged_root: ElementTree.Element = ElementTree.Element('contents')
+    merged_root = ElementTree.Element('contents')
     merged_root.set('contents', str(len(el)))
     merged_root.extend(el)
 
@@ -165,7 +165,7 @@ def get_eshop_content():
             count_ok = 0
             count_new = 0
             offset = 0
-            title_elements: List[ElementTree.Element] = []
+            title_elements = []
             while True:
                 url = urlbase.format(lang=l, offs=offset)
                 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -176,7 +176,7 @@ def get_eshop_content():
                     if el.find('contents') is None:
                         break
                     # the only element inside an eshop element should be a contents one.
-                    contents_root: ElementTree.Element = list(el)[0]
+                    contents_root = list(el)[0]
 
                     # check length
                     length = int(contents_root.get('length'))

@@ -12,7 +12,6 @@ from xml.etree import ElementTree
 from typing import List
 
 titlekeyurl = None 
-# urlbase = 'https://samurai.ctr.shop.nintendo.net/samurai/ws/{lang}/titles?offset={offs}'
 urlbase = 'https://samurai.ctr.eshop.nintendo.net/samurai/ws/{lang}/contents?shop_id=1&limit=200&offset={offs}'
 urlbase_ec = 'https://ninja.ctr.shop.nintendo.net/ninja/ws/{lang}/title/{eshop_id}/ec_info?shop_id=1&lang=en'
 
@@ -64,6 +63,11 @@ def write_eshop_content(el, out):
 
 
 def add_eshop_ec_info():
+    # certificate available
+    if not os.path.isfile('ctr-common-1.crt') or not os.path.isfile('ctr-common-1.key'):
+        return
+
+    # only continue if certs are available
     with requests.session() as s:
         s.verify=False
         s.cert=('ctr-common-1.crt', 'ctr-common-1.key')
@@ -80,13 +84,10 @@ def add_eshop_ec_info():
                     break
 
             url = urlbase_ec.format(lang=lng, eshop_id=eid)
-            try:
-                with s.get(url) as r:
-                    el = ElementTree.fromstring(r.content)
-                    data_root = list(el)[0]
-                    cn.insert(1, data_root)#
-            except OSError:
-                return
+            with s.get(url) as r:
+                el = ElementTree.fromstring(r.content)
+                data_root = list(el)[0]
+                cn.insert(1, data_root)
 
             count_ok += 1
             print('Adding eshop ecommerce info: ' + str(count_ok) + ' / ' + str(count_all) + ' entries', end = '\r')

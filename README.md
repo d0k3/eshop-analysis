@@ -15,4 +15,4 @@ Just run the script via `py -3 eat.py` (or `python3 eat.py` on unix). To include
 You may also limit the scope of analysed regions via `-r [REGION]` or `--region=[REGION]`, whereas `[REGION]` is `english`, `main` or the two letter country code of a specific region. Resulting CSV files will be written to the `results` subdirectory, intermediate dumps will be written to the `dumped` subdirectory.
 
 # Credits
-I actually learnt Python writing this script, and doing so wouldn't have been possible with @ihaveamac's help. @ihaveamac also started this by providing the eShop parser function. Thanks a gigaton!
+I actually learnt Python writing this script, and doing so wouldn't have been possible without @ihaveamac's help. @ihaveamac also started this by providing the eShop parser function. Thanks a gigaton!

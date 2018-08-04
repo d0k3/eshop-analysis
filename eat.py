@@ -20,6 +20,7 @@ resultdest = 'results'
 
 csv_eshop_analysis = resultdest + '/' + 'eshop_analysis_all_in_one.csv'
 csv_3dsdb_releases = resultdest + '/' + '3dsdb_releases.csv'
+csv_titlekeydb = resultdest + '/' + 'titlekeys.csv'
 csv_unique_downloads = resultdest + '/' + 'unique_download_titles.csv'
 csv_missing_3dsdb_from_eshop = resultdest + '/' + 'missing_3dsdb_from_eshop.csv'
 csv_missing_retail_dumps_no_download = resultdest + '/' + 'missing_retail_dumps_no_download.csv'
@@ -30,6 +31,7 @@ csv_missing_archive_all = resultdest + '/' + 'missing_archive_all.csv'
 
 csv_fieldnames_eshop = ['title_id', 'product_code', 'region_id', 'name', 'publisher', 'publisher_id', 'platform', 'platform_id', 'genre', 'size', 'release_eshop', 'release_retail', 'eshop_regions', 'score', 'votes', 'titlekey_known', '3dsdb_id', 'alternative_download', 'alternative_with_titlekey', 'best_alternative']
 csv_fieldnames_3dsdb = ['title_id', 'product_code', 'region_id', 'name', 'publisher', 'region', 'languages', 'size', '3dsdb_id', 'alternative_download', 'alternative_with_titlekey', 'best_alternative']
+csv_fieldnames_titlekeys = ['title_id', 'product_code', 'titlekey_enc', 'name', 'region', 'size']
 
 langs_english = ('US', 'GB')
 langs_main = ('US', 'GB', 'JP', 'AU', 'ES', 'DE', 'IT', 'FR', 'NL', 'KR', 'TW', 'HK')
@@ -374,6 +376,19 @@ def analyse_3dsdb(english_only):
         print('Adding missing entries from 3dsdb.com: ' + str(count_missing) + ' / ' + str(count_all) + ' entries', end = '\n')
 
 
+def dump_titlekeydb():
+    with open(csv_titlekeydb, 'w', encoding='utf-8') as ttk_csv:
+        ttkw = csv.DictWriter(ttk_csv, fieldnames = csv_fieldnames_titlekeys, lineterminator='\n')
+        ttkw.writeheader()
+
+        count_ok = 0
+        for ttk in enctitlekeydb_data:
+            print('Dumping titlekeydb data: ' + str(count_ok) + ' entries', end = '\r')
+            ttkw.writerow({'title_id': ttk['titleID'], 'product_code': ttk['serial'], 'titlekey_enc': ttk['encTitleKey'], 'name': ttk['name'], 'size': ttk['size']})
+            count_ok += 1
+        print('Dumping titlekeydb data: ' + str(count_ok) + ' entries', end = '\n')
+
+
 def build_eshop_analysis():
     with open(csv_eshop_analysis, 'w', encoding='utf-8') as ea_csv:
         eaw = csv.DictWriter(ea_csv, fieldnames = csv_fieldnames_eshop, lineterminator='\n')
@@ -602,6 +617,7 @@ if __name__ == '__main__':
     # get all required contents
     if titlekeyurl:
         get_enctitlekeydb_data()
+        dump_titlekeydb()
     get_3dsdb_content()
     get_eshop_content()
     analyse_3dsdb(english_only)

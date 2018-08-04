@@ -169,7 +169,18 @@ def merge_eshop_content(cn, pc, l):
         sel = ElementTree.SubElement(cncp, 'enctitlekey')
         if ttcp.find('eshop_sales').text == 'true':
             for ttk in enctitlekeydb_data:
-                if ttk['serial'] == pc:
+                sr = ttk['serial']
+                if sr is None:
+                    continue
+
+                # workaround for bad product codes in titlekey db
+                sr_alt = None
+                if sr[3:6] == '-N-':
+                    sr_alt = sr[0:3] + '-P-' + sr[6:10]
+                elif sr[3:6] == '-P-':
+                    sr_alt = sr[0:3] + '-N-' + sr[6:10]
+
+                if sr == pc or sr_alt == pc:
                     sel.text = ttk['encTitleKey']
                     break
 

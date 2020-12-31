@@ -31,7 +31,7 @@ csv_missing_archive_all = resultdest + '/' + 'missing_archive_all.csv'
 
 csv_fieldnames_eshop = ['title_id', 'product_code', 'region_id', 'name', 'publisher', 'publisher_id', 'platform', 'platform_id', 'genre', 'size', 'release_eshop', 'release_retail', 'eshop_regions', 'score', 'votes', 'titlekey_known', '3dsdb_id', 'alternative_download', 'alternative_with_titlekey', 'best_alternative']
 csv_fieldnames_3dsdb = ['title_id', 'product_code', 'region_id', 'name', 'publisher', 'region', 'languages', 'size', '3dsdb_id', 'alternative_download', 'alternative_with_titlekey', 'best_alternative']
-csv_fieldnames_titlekeys = ['title_id', 'product_code', 'titlekey_enc', 'name', 'region', 'size']
+csv_fieldnames_titlekeys = ['title_id', 'product_code', 'titlekey_dec', 'titlekey_enc', 'name', 'region', 'size']
 
 langs_english = ('US', 'GB')
 langs_main = ('US', 'GB', 'JP', 'AU', 'ES', 'DE', 'IT', 'FR', 'NL', 'KR', 'TW', 'HK')
@@ -43,7 +43,7 @@ region_id_pref = {'A' : 0, 'P' : 1, 'E' : 2, 'J' : 3, 'S' : 4, 'D' : 5, 'F' : 6,
 
 merged_eshop_elements = []
 db_release_elements = []
-enctitlekeydb_data = []
+titlekeydb_data = []
 
 
 def write_eshop_content(el, out):
@@ -166,9 +166,9 @@ def merge_eshop_content(cn, pc, l):
                 cur.text = 'true'
 
         # add titlekey (if available)
-        sel = ElementTree.SubElement(cncp, 'enctitlekey')
+        sel = ElementTree.SubElement(cncp, 'dectitlekey')
         if ttcp.find('eshop_sales').text == 'true':
-            for ttk in enctitlekeydb_data:
+            for ttk in titlekeydb_data:
                 sr = ttk['serial']
                 if sr is None:
                     continue
@@ -181,7 +181,7 @@ def merge_eshop_content(cn, pc, l):
                     sr_alt = sr[0:3] + '-N-' + sr[6:10]
 
                 if sr == pc or sr_alt == pc:
-                    sel.text = ttk['encTitleKey']
+                    sel.text = ttk['titleKey']
                     break
 
         # remove unneeded stuff
@@ -203,7 +203,7 @@ def merge_eshop_content(cn, pc, l):
 
         merged_eshop_elements.append(cncp)
 
-    # true if mnew addition
+    # true if new addition
     return not dup
 
 
@@ -308,18 +308,18 @@ def get_3dsdb_content():
         print('Loading 3DSDB cart data: ' + str(count_ok) + ' / ' + str(count_all) + ' entries', end = '\n')
 
 
-def get_enctitlekeydb_data():
-    global enctitlekeydb_data
+def get_titlekeydb_data():
+    global titlekeydb_data
     print('Loading titlekeydb data: ...', end = '\r')
 
-    url = titlekeyurl + '/json_enc'
+    url = titlekeyurl + '/json'
     with requests.get(url) as r:
         out = dumpdest + '/titlekeydb.json'
         with open(out, 'wb') as f:
             f.write(r.content)
-        enctitlekeydb_data = r.json()
+        titlekeydb_data = r.json()
 
-        print('Loading titlekeydb data: ' + str(len(enctitlekeydb_data)) + ' entries', end = '\n')
+        print('Loading titlekeydb data: ' + str(len(titlekeydb_data)) + ' entries', end = '\n')
 
 
 def analyse_3dsdb(english_only):
@@ -353,7 +353,7 @@ def analyse_3dsdb(english_only):
             for cn in merged_eshop_elements:
                 pc = cn.find('title').find('product_code').text
                 es = cn.find('title').find('eshop_sales').text
-                ttk = cn.find('enctitlekey').text
+                ttk = cn.find('dectitlekey').text
                 if pc == pc_n or pc == pc_p:
                     found = True
                 elif pc[6:9] == gid and es == 'true':
@@ -393,9 +393,9 @@ def dump_titlekeydb():
         ttkw.writeheader()
 
         count_ok = 0
-        for ttk in enctitlekeydb_data:
+        for ttk in titlekeydb_data:
             print('Dumping titlekeydb data: ' + str(count_ok) + ' entries', end = '\r')
-            ttkw.writerow({'title_id': ttk['titleID'], 'product_code': ttk['serial'], 'titlekey_enc': ttk['encTitleKey'], 'name': ttk['name'], 'size': ttk['size']})
+            ttkw.writerow({'title_id': ttk['titleID'], 'product_code': ttk['serial'], 'titlekey_dec': ttk['titleKey'], 'titlekey_enc': ttk['encTitleKey'], 'name': ttk['name'], 'size': ttk['size']})
             count_ok += 1
         print('Dumping titlekeydb data: ' + str(count_ok) + ' entries', end = '\n')
 
@@ -445,7 +445,7 @@ def build_eshop_analysis():
                 score = sr.find('score').text
                 votes = sr.find('votes').text
 
-            titlekey = cn.find('enctitlekey').text
+            titlekey = cn.find('dectitlekey').text
             titlekey_known = 'false'
             if titlekey is not None and titlekey != '':
                 titlekey_known = 'true'
@@ -462,7 +462,7 @@ def build_eshop_analysis():
             eshop_alt = []
             eshop_alt_ttk = []
             for cn0 in merged_eshop_elements:
-                ttk0 = cn0.find('enctitlekey').text
+                ttk0 = cn0.find('dectitlekey').text
                 es0 = cn0.find('title').find('eshop_sales').text
                 pc0 = cn0.find('title').find('product_code').text
                 code0 = pc0[6:10]
@@ -596,7 +596,7 @@ if __name__ == '__main__':
 
     # say hello
     print('\n')
-    print('3DS eshop analysis tool (c) 2018')
+    print('3DS eshop analysis tool (c) 2020')
     print('--------------------------------')
 
     # parse arguments
@@ -627,7 +627,7 @@ if __name__ == '__main__':
 
     # get all required contents
     if titlekeyurl:
-        get_enctitlekeydb_data()
+        get_titlekeydb_data()
         dump_titlekeydb()
     get_3dsdb_content()
     get_eshop_content()

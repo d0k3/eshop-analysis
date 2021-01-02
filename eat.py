@@ -12,8 +12,9 @@ from xml.etree import ElementTree
 from typing import List
 
 titlekeyurl = None 
-urlbase = 'https://samurai.ctr.eshop.nintendo.net/samurai/ws/{lang}/contents?shop_id=1&limit=200&offset={offs}'
-urlbase_ec = 'https://ninja.ctr.shop.nintendo.net/ninja/ws/{lang}/title/{eshop_id}/ec_info?shop_id=1&lang=en'
+# use shop_id=1 for urlbases to limit this to the 3DS eshop
+urlbase = 'https://samurai.wup.eshop.nintendo.net/samurai/ws/{lang}/contents?shop_id=4&limit=200&offset={offs}'
+urlbase_ec = 'https://ninja.wup.shop.nintendo.net/ninja/ws/{lang}/title/{eshop_id}/ec_info?shop_id=4&lang=en'
 
 dumpdest = 'dumped'
 resultdest = 'results'
@@ -37,7 +38,7 @@ langs_english = ('US', 'GB')
 langs_main = ('US', 'GB', 'JP', 'AU', 'ES', 'DE', 'IT', 'FR', 'NL', 'KR', 'TW', 'HK')
 langs_all = ('US', 'GB', 'JP', 'AU', 'ES', 'DE', 'IT', 'FR', 'NL', 'AX', 'AF', 'AL', 'DZ', 'AS', 'AD', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BY', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BA', 'BW', 'BV', 'BR', 'IO', 'BN', 'BG', 'BF', 'BI', 'KH', 'CM', 'CA', 'CV', 'KY', 'CF', 'TD', 'CL', 'CN', 'CX', 'CC', 'CO', 'KM', 'CD', 'CG', 'CK', 'CR', 'CI', 'HR', 'CU', 'CY', 'CZ', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'ET', 'FK', 'FO', 'FJ', 'FI', 'GF', 'PF', 'TF', 'GA', 'GM', 'GE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GP', 'GU', 'GT', 'GN', 'GW', 'GY', 'HT', 'HM', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IR', 'IQ', 'IE', 'IL', 'JM', 'JO', 'KZ', 'KE', 'KI', 'KP', 'KR', 'KW', 'KG', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MO', 'MK', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MQ', 'MR', 'MU', 'YT', 'MX', 'FM', 'MD', 'MC', 'MN', 'MS', 'MA', 'MZ', 'MM', 'NA', 'NR', 'NP', 'AN', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'RW', 'SH', 'KN', 'LC', 'PM', 'VC', 'WS', 'SM', 'ST', 'SA', 'SN', 'CS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'LK', 'SD', 'SR', 'SJ', 'SZ', 'SE', 'CH', 'SY', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'AE', 'UM', 'UY', 'UZ', 'VU', 'VA', 'VE', 'VN', 'VG', 'VI', 'WF', 'EH', 'YE', 'ZM', 'ZW')
 
-platform_dict = {'18' : 'Nintendo 3DS Retail Only', '19' : 'Nintendo 3DS Download Only', '20' : 'Nintendo DSiWare', '21' : 'Nintendo Game Boy', '22' : 'Nintendo Game Boy Color', '23' : 'Nintendo Game Boy Advance', '24' : 'NES', '25' : 'Game Gear', '26' : 'Turbografx', '30' : 'Wii U Retail Only', '43' : 'Downloadable Video', '63' : 'Nintendo 3DS Software Update', '83' : 'Nintendo 3DS Software Update (JP)', '103' : 'Nintendo 3DS Retail/Download', '124' : 'Wii U Download Only', '125' : 'Wii U Retail/Download', '163' : 'NES', '164' : 'Super NES', '166' : 'TurboGrafx16', '168' : 'Game Boy Advance', '169' : 'Nintendo DS', '170' : 'Nintendo 64', '171' : 'Wii Retail/Download', '1001' : 'New 3DS Download Only', '1002' : 'New 3DS Retail/Download', '1003' : 'New 3DS Software Update', '1004' : 'Super Nintendo'}
+platform_dict = {'18' : 'Nintendo 3DS Retail Only', '19' : 'Nintendo 3DS Download Only', '20' : 'Nintendo DSiWare', '21' : 'Nintendo Game Boy', '22' : 'Nintendo Game Boy Color', '23' : 'Nintendo Game Boy Advance', '24' : 'NES', '25' : 'Game Gear', '26' : 'Turbografx', '30' : 'Wii U Retail Only', '43' : 'Downloadable Video', '63' : 'Nintendo 3DS Software Update', '83' : 'Nintendo 3DS Software Update (JP)', '103' : 'Nintendo 3DS Retail/Download', '124' : 'Wii U Download Only', '125' : 'Wii U Retail/Download', '143' : 'Wii U TVii', '163' : 'NES', '164' : 'Super NES', '165' : 'Wii U Uplay', '166' : 'TurboGrafx16', '167' : 'MSX', '168' : 'Game Boy Advance', '169' : 'Nintendo DS', '170' : 'Nintendo 64', '171' : 'Wii Retail/Download', '1001' : 'New 3DS Download Only', '1002' : 'New 3DS Retail/Download', '1003' : 'New 3DS Software Update', '1004' : 'Super Nintendo'}
 
 region_id_pref = {'A' : 0, 'P' : 1, 'E' : 2, 'J' : 3, 'S' : 4, 'D' : 5, 'F' : 6, 'I' : 7, 'H' : 8, 'R' : 9, 'W' : 10, 'K' : 11, 'V' : 12, 'X' : 13, 'Y' : 14, 'Z' : 15, 'T' : 16, 'O' : 17, 'U' : 18}
 
@@ -356,7 +357,7 @@ def analyse_3dsdb(english_only):
                 ttk = cn.find('dectitlekey').text
                 if pc == pc_n or pc == pc_p:
                     found = True
-                elif pc[6:9] == gid and es == 'true':
+                elif pc[0:3] == type and pc[6:9] == gid and es == 'true':
                     eshop_alt.append(pc)
                     if ttk is not None:
                         eshop_alt_ttk.append(pc)
@@ -395,7 +396,7 @@ def dump_titlekeydb():
         count_ok = 0
         for ttk in titlekeydb_data:
             print('Dumping titlekeydb data: ' + str(count_ok) + ' entries', end = '\r')
-            ttkw.writerow({'title_id': ttk['titleID'], 'product_code': ttk['serial'], 'titlekey_dec': ttk['titleKey'], 'titlekey_enc': ttk['encTitleKey'], 'name': ttk['name'], 'size': ttk['size']})
+            ttkw.writerow({'title_id': ttk['titleID'], 'product_code': ttk['serial'], 'titlekey_dec': ttk['titleKey'], 'titlekey_enc': ttk['encTitleKey'], 'password': ttk['password'], 'name': ttk['name'], 'size': ttk['size']})
             count_ok += 1
         print('Dumping titlekeydb data: ' + str(count_ok) + ' entries', end = '\n')
 
@@ -459,6 +460,7 @@ def build_eshop_analysis():
 
             code = pc[6:10]
             gid = pc[6:9]
+            type = pc[0:3]
             eshop_alt = []
             eshop_alt_ttk = []
             for cn0 in merged_eshop_elements:
@@ -467,7 +469,8 @@ def build_eshop_analysis():
                 pc0 = cn0.find('title').find('product_code').text
                 code0 = pc0[6:10]
                 gid0 = pc0[6:9]
-                if code0 != code and gid0 == gid and es0 == 'true':
+                type0 = pc0[0:3]
+                if code0 != code and type0 == type and gid0 == gid and es0 == 'true':
                     eshop_alt.append(pc0)
                     if ttk0 is not None:
                         eshop_alt_ttk.append(pc0)

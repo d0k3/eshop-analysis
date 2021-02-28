@@ -33,11 +33,11 @@ csv_missing_titlekeys = resultdest + '/' + 'missing_titlekeys.csv'
 csv_missing_archive_eshop = resultdest + '/' + 'missing_archive_eshop.csv'
 csv_missing_archive_all = resultdest + '/' + 'missing_archive_all.csv'
 
-csv_fieldnames_eshop = ['title_id', 'product_code', 'region_id', 'name', 'publisher', 'publisher_id', 'platform', 'platform_id', 'genre', 'size', 'release_eshop', 'release_retail', 'eshop_regions', 'score', 'votes', 'best_price_usd', 'best_price_region', 'titlekey_known', '3dsdb_id', 'alternative_download', 'alternative_with_titlekey', 'best_alternative']
+csv_fieldnames_eshop = ['title_id', 'product_code', 'region_id', 'name', 'publisher', 'publisher_id', 'platform', 'platform_id', 'genre', 'size', 'release_eshop', 'release_retail', 'eshop_regions', 'score', 'votes', 'best_price', 'best_price_region', 'titlekey_known', '3dsdb_id', 'alternative_download', 'alternative_with_titlekey', 'best_alternative']
 csv_fieldnames_3dsdb = ['title_id', 'product_code', 'region_id', 'name', 'publisher', 'region', 'languages', 'size', '3dsdb_id', 'alternative_download', 'alternative_with_titlekey', 'best_alternative']
 csv_fieldnames_titlekeys = ['title_id', 'product_code', 'titlekey_dec', 'titlekey_enc', 'password', 'name', 'region', 'size']
 
-langs_english = ('US', 'GB')
+langs_english = ('US', 'GB', 'CA', 'AU')
 langs_main = ('US', 'GB', 'JP', 'AU', 'ES', 'DE', 'IT', 'FR', 'NL', 'CA', 'RU', 'KR', 'TW', 'HK')
 langs_all = ('US', 'GB', 'JP', 'AU', 'ES', 'DE', 'IT', 'FR', 'NL', 'AX', 'AF', 'AL', 'DZ', 'AS', 'AD', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BY', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BA', 'BW', 'BV', 'BR', 'IO', 'BN', 'BG', 'BF', 'BI', 'KH', 'CM', 'CA', 'CV', 'KY', 'CF', 'TD', 'CL', 'CN', 'CX', 'CC', 'CO', 'KM', 'CD', 'CG', 'CK', 'CR', 'CI', 'HR', 'CU', 'CY', 'CZ', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'ET', 'FK', 'FO', 'FJ', 'FI', 'GF', 'PF', 'TF', 'GA', 'GM', 'GE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GP', 'GU', 'GT', 'GN', 'GW', 'GY', 'HT', 'HM', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IR', 'IQ', 'IE', 'IL', 'JM', 'JO', 'KZ', 'KE', 'KI', 'KP', 'KR', 'KW', 'KG', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MO', 'MK', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MQ', 'MR', 'MU', 'YT', 'MX', 'FM', 'MD', 'MC', 'MN', 'MS', 'MA', 'MZ', 'MM', 'NA', 'NR', 'NP', 'AN', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'RW', 'SH', 'KN', 'LC', 'PM', 'VC', 'WS', 'SM', 'ST', 'SA', 'SN', 'CS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'LK', 'SD', 'SR', 'SJ', 'SZ', 'SE', 'CH', 'SY', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'AE', 'UM', 'UY', 'UZ', 'VU', 'VA', 'VE', 'VN', 'VG', 'VI', 'WF', 'EH', 'YE', 'ZM', 'ZW')
 
@@ -110,12 +110,12 @@ def add_eshop_prices(currency):
 
     # get exchange rates
     rates = {}
-    url = f'http://www.floatrates.com/daily/{currency.lower()}.json'
+    url = 'http://www.floatrates.com/daily/{curr}.json'.format(curr=currency.lower())
     with requests.get(url) as r:
         tbl = r.json()
         for e in tbl:
-            rates[e.strip().upper()] = tbl[e]['rate']
-    rates[currency.upper()] = 1.00
+            rates[e.strip().upper()] = float(tbl[e]['rate'])
+    rates[currency.upper()] = float(1.00)
     
     # get eshop prices
     with requests.session() as s:
@@ -127,7 +127,7 @@ def add_eshop_prices(currency):
         for cn in merged_eshop_elements:
             eid = cn.find('title').get('id')
             er = cn.find('eshop_regions')
-            p_best = 999999.0
+            p_best = 999999999.0
             p_region = 'none'
             for l in langs:
                 if er.find(l).text != 'true':
@@ -150,9 +150,9 @@ def add_eshop_prices(currency):
                     curr = price['currency']
                     if not curr in rates:
                         continue
-                    p_best = float(price['raw_value']) / float(rates[curr])
-                    if p_best < p_best:
-                        p_best = p_best
+                    p_best_this = float(price['raw_value']) / rates[curr]
+                    if p_best_this < p_best:
+                        p_best = p_best_this
                         p_region = l
             # add eshop_prices
             sel = ElementTree.SubElement(cn, 'eshop_best_price')
@@ -794,8 +794,7 @@ if __name__ == '__main__':
     elif args.region == 'all':
         langs = langs_all
     elif args.region:
-        langs = []
-        langs.append(args.region)
+        langs = [ args.region ]
         english_only = True
 
     if not titlekeyurl and args.titlekeyurl:

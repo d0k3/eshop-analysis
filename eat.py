@@ -17,6 +17,7 @@ urlbase_eshop = 'https://samurai.wup.eshop.nintendo.net/samurai/ws/{lang}/titles
 urlbase_title = 'https://samurai.wup.eshop.nintendo.net/samurai/ws/{lang}/title/{eshop_id}'
 urlbase_eid = 'https://ninja.ctr.shop.nintendo.net/ninja/ws/titles/id_pair?title_id[]={title_id}'
 urlbase_ec = 'https://ninja.wup.shop.nintendo.net/ninja/ws/{lang}/title/{eshop_id}/ec_info?shop_id=4&lang=en'
+urlbase_price = 'https://api.ec.nintendo.com/v1/price?ids={eshop_id}&country={lang}&lang=en'
 
 dumpdest = 'dumped'
 resultdest = 'results'
@@ -37,7 +38,7 @@ csv_fieldnames_3dsdb = ['title_id', 'product_code', 'region_id', 'name', 'publis
 csv_fieldnames_titlekeys = ['title_id', 'product_code', 'titlekey_dec', 'titlekey_enc', 'password', 'name', 'region', 'size']
 
 langs_english = ('US', 'GB')
-langs_main = ('US', 'GB', 'JP', 'AU', 'ES', 'DE', 'IT', 'FR', 'NL', 'KR', 'TW', 'HK')
+langs_main = ('US', 'GB', 'JP', 'AU', 'ES', 'DE', 'IT', 'FR', 'NL', 'CA', 'RU', 'KR', 'TW', 'HK')
 langs_all = ('US', 'GB', 'JP', 'AU', 'ES', 'DE', 'IT', 'FR', 'NL', 'AX', 'AF', 'AL', 'DZ', 'AS', 'AD', 'AO', 'AI', 'AQ', 'AG', 'AR', 'AM', 'AW', 'AT', 'AZ', 'BS', 'BH', 'BD', 'BB', 'BY', 'BE', 'BZ', 'BJ', 'BM', 'BT', 'BO', 'BA', 'BW', 'BV', 'BR', 'IO', 'BN', 'BG', 'BF', 'BI', 'KH', 'CM', 'CA', 'CV', 'KY', 'CF', 'TD', 'CL', 'CN', 'CX', 'CC', 'CO', 'KM', 'CD', 'CG', 'CK', 'CR', 'CI', 'HR', 'CU', 'CY', 'CZ', 'DK', 'DJ', 'DM', 'DO', 'EC', 'EG', 'SV', 'GQ', 'ER', 'EE', 'ET', 'FK', 'FO', 'FJ', 'FI', 'GF', 'PF', 'TF', 'GA', 'GM', 'GE', 'GH', 'GI', 'GR', 'GL', 'GD', 'GP', 'GU', 'GT', 'GN', 'GW', 'GY', 'HT', 'HM', 'HN', 'HK', 'HU', 'IS', 'IN', 'ID', 'IR', 'IQ', 'IE', 'IL', 'JM', 'JO', 'KZ', 'KE', 'KI', 'KP', 'KR', 'KW', 'KG', 'LA', 'LV', 'LB', 'LS', 'LR', 'LY', 'LI', 'LT', 'LU', 'MO', 'MK', 'MG', 'MW', 'MY', 'MV', 'ML', 'MT', 'MH', 'MQ', 'MR', 'MU', 'YT', 'MX', 'FM', 'MD', 'MC', 'MN', 'MS', 'MA', 'MZ', 'MM', 'NA', 'NR', 'NP', 'AN', 'NC', 'NZ', 'NI', 'NE', 'NG', 'NU', 'NF', 'MP', 'NO', 'OM', 'PK', 'PW', 'PS', 'PA', 'PG', 'PY', 'PE', 'PH', 'PN', 'PL', 'PT', 'PR', 'QA', 'RE', 'RO', 'RU', 'RW', 'SH', 'KN', 'LC', 'PM', 'VC', 'WS', 'SM', 'ST', 'SA', 'SN', 'CS', 'SC', 'SL', 'SG', 'SK', 'SI', 'SB', 'SO', 'ZA', 'GS', 'LK', 'SD', 'SR', 'SJ', 'SZ', 'SE', 'CH', 'SY', 'TW', 'TJ', 'TZ', 'TH', 'TL', 'TG', 'TK', 'TO', 'TT', 'TN', 'TR', 'TM', 'TC', 'TV', 'UG', 'UA', 'AE', 'UM', 'UY', 'UZ', 'VU', 'VA', 'VE', 'VN', 'VG', 'VI', 'WF', 'EH', 'YE', 'ZM', 'ZW')
 
 platform_dict = {'18' : 'Nintendo 3DS Retail Only', '19' : 'Nintendo 3DS Download Only', '20' : 'Nintendo DSiWare', '21' : 'Nintendo Game Boy', '22' : 'Nintendo Game Boy Color', '23' : 'Nintendo Game Boy Advance', '24' : 'NES', '25' : 'Game Gear', '26' : 'Turbografx', '30' : 'Wii U Retail Only', '43' : 'Downloadable Video', '63' : 'Nintendo 3DS Software Update', '83' : 'Nintendo 3DS Software Update (JP)', '103' : 'Nintendo 3DS Retail/Download', '124' : 'Wii U Download Only', '125' : 'Wii U Retail/Download', '143' : 'Wii U TVii', '163' : 'NES', '164' : 'Super NES', '165' : 'Wii U Uplay', '166' : 'TurboGrafx16', '167' : 'MSX', '168' : 'Game Boy Advance', '169' : 'Nintendo DS', '170' : 'Nintendo 64', '171' : 'Wii Retail/Download', '1001' : 'New 3DS Download Only', '1002' : 'New 3DS Retail/Download', '1003' : 'New 3DS Software Update', '1004' : 'Super Nintendo'}
@@ -98,6 +99,73 @@ def add_eshop_ec_info():
             print('Adding eshop ecommerce info: ' + str(count_ok) + ' / ' + str(count_all) + ' entries', end = '\r')
 
         print('Adding eshop ecommerce info: ' + str(count_ok) + ' / ' + str(count_all) + ' entries', end = '\n')
+        
+        
+def add_eshop_prices(currency):
+    # certificate available
+    if not os.path.isfile('ctr-common-1.crt') or not os.path.isfile('ctr-common-1.key'):
+        return
+    
+    print('Adding eshop prices: ...', end = '\r')
+
+    # get exchange rates
+    rates = {}
+    url = f'http://www.floatrates.com/daily/{currency.lower()}.json'
+    with requests.get(url) as r:
+        tbl = r.json()
+        for e in tbl:
+            rates[e.strip().upper()] = tbl[e]['rate']
+    rates[currency.upper()] = 1.00
+    
+    # get eshop prices
+    with requests.session() as s:
+        s.verify = False
+        s.cert=('ctr-common-1.crt', 'ctr-common-1.key')
+
+        count_all = len(merged_eshop_elements)
+        count_ok = 0
+        for cn in merged_eshop_elements:
+            eid = cn.find('title').get('id')
+            er = cn.find('eshop_regions')
+            p_best = 999999.0
+            p_region = 'none'
+            for l in langs:
+                if er.find(l).text != 'true':
+                    continue
+                url = urlbase_price.format(eshop_id=eid, lang=l)
+                with s.get(url) as r:
+                    pdata = r.json()
+                    if not 'prices' in pdata or len(pdata['prices']) == 0:
+                        continue
+                    pd = pdata['prices'][0]
+                    if not 'sales_status' in pd or pd['sales_status'] != 'onsale':
+                        continue
+                    if not 'regular_price' in pd:
+                        continue
+                    price = None
+                    if 'discount_price' in pd:
+                        price = pd['discount_price']
+                    else:
+                        price = pd['regular_price']
+                    curr = price['currency']
+                    if not curr in rates:
+                        continue
+                    p_best = float(price['raw_value']) / float(rates[curr])
+                    if p_best < p_best:
+                        p_best = p_best
+                        p_region = l
+            # add eshop_prices
+            sel = ElementTree.SubElement(cn, 'eshop_best_price')
+            cur = ElementTree.SubElement(sel, 'p_best')
+            cur.text = str(round(p_best, 2))
+            cur = ElementTree.SubElement(sel, 'p_region')
+            cur.text = str(p_region)
+            
+            if p_region != 'none':
+                count_ok += 1
+            print('Adding eshop prices: ' + str(count_ok) + ' / ' + str(count_all) + ' entries', end = '\r')
+            
+        print('Adding eshop prices: ' + str(count_ok) + ' / ' + str(count_all) + ' entries', end = '\n')
 
 
 def merge_eshop_content(cn, pc, l):
@@ -513,6 +581,7 @@ def build_eshop_analysis():
             sr = tt.find('star_rating_info')
             es = cn.find('eshop_regions')
             ec = cn.find('title_ec_info')
+            ep = cn.find('eshop_best_price')
 
             pc = tt.find('product_code').text
             rid = pc[9:10]
@@ -521,6 +590,11 @@ def build_eshop_analysis():
             genre = tt.find('display_genre').text
             pub_name = pub.find('name').text
             pub_id = pub.get('id')
+            p_best = '-'
+            p_reg = '-'
+            if ep is not None:
+                p_best = ep.find('p_best').text
+                p_reg = ep.find('p_region').text
 
             rel_e = ''
             if tt.find('release_date_on_eshop') is not None:
@@ -591,7 +665,7 @@ def build_eshop_analysis():
                 if ec.find('content_size') is not None:
                     size = ec.find('content_size').text
 
-            eaw.writerow({'title_id': title_id, 'product_code': pc, 'region_id': rid, 'name': name, 'publisher': pub_name, 'publisher_id': pub_id, 'platform': platform, 'platform_id' : pid, 'genre': genre, 'size': size, 'release_eshop': rel_e, 'release_retail': rel_r, 'eshop_regions': '/'.join(eshop_regs), 'score': score, 'votes': votes, 'titlekey_known': titlekey_known, '3dsdb_id': dbid, 'alternative_download': ' / '.join(eshop_alt), 'alternative_with_titlekey': ' / '.join(eshop_alt_ttk), 'best_alternative': best_alt})
+            eaw.writerow({'title_id': title_id, 'product_code': pc, 'region_id': rid, 'name': name, 'publisher': pub_name, 'publisher_id': pub_id, 'platform': platform, 'platform_id' : pid, 'genre': genre, 'size': size, 'release_eshop': rel_e, 'release_retail': rel_r, 'eshop_regions': '/'.join(eshop_regs), 'score': score, 'votes': votes, 'best_price' : p_best, 'best_price_region' : p_reg, 'titlekey_known': titlekey_known, '3dsdb_id': dbid, 'alternative_download': ' / '.join(eshop_alt), 'alternative_with_titlekey': ' / '.join(eshop_alt_ttk), 'best_alternative': best_alt})
             count_ok += 1
 
         # try append data from 3DSDB
@@ -707,6 +781,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--region", type=str, help="specify eshop region (english/main/all/XX)")
     parser.add_argument("-l", "--list", type=str, help="specify a file with titleid list")
+    parser.add_argument("-c", "--currency", type=str, help="check prices for titles, currency needs to be specified (slow)")
     if not titlekeyurl:
         parser.add_argument("-t", "--titlekeyurl", type=str, help="specify titlekey page url (with http://)")
     args = parser.parse_args()
@@ -740,5 +815,7 @@ if __name__ == '__main__':
         analyse_3dsdb(english_only)
     else:
         get_idlist_content(args.list)
+    if args.currency:
+        add_eshop_prices(args.currency)
     build_eshop_analysis()
     analyse_missing()

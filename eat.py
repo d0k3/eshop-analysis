@@ -13,7 +13,9 @@ from typing import List
 
 titlekeyurl = None 
 # use shop_id=1 for urlbases to limit this to the 3DS eshop
-urlbase = 'https://samurai.wup.eshop.nintendo.net/samurai/ws/{lang}/contents?shop_id=4&limit=200&offset={offs}'
+urlbase_eshop = 'https://samurai.wup.eshop.nintendo.net/samurai/ws/{lang}/titles?shop_id=4&limit=200&offset={offs}'
+urlbase_title = 'https://samurai.wup.eshop.nintendo.net/samurai/ws/{lang}/title/{eshop_id}'
+urlbase_eid = 'https://ninja.ctr.shop.nintendo.net/ninja/ws/titles/id_pair?title_id[]={title_id}'
 urlbase_ec = 'https://ninja.wup.shop.nintendo.net/ninja/ws/{lang}/title/{eshop_id}/ec_info?shop_id=4&lang=en'
 
 dumpdest = 'dumped'
@@ -30,7 +32,7 @@ csv_missing_titlekeys = resultdest + '/' + 'missing_titlekeys.csv'
 csv_missing_archive_eshop = resultdest + '/' + 'missing_archive_eshop.csv'
 csv_missing_archive_all = resultdest + '/' + 'missing_archive_all.csv'
 
-csv_fieldnames_eshop = ['title_id', 'product_code', 'region_id', 'name', 'publisher', 'publisher_id', 'platform', 'platform_id', 'genre', 'size', 'release_eshop', 'release_retail', 'eshop_regions', 'score', 'votes', 'titlekey_known', '3dsdb_id', 'alternative_download', 'alternative_with_titlekey', 'best_alternative']
+csv_fieldnames_eshop = ['title_id', 'product_code', 'region_id', 'name', 'publisher', 'publisher_id', 'platform', 'platform_id', 'genre', 'size', 'release_eshop', 'release_retail', 'eshop_regions', 'score', 'votes', 'best_price_usd', 'best_price_region', 'titlekey_known', '3dsdb_id', 'alternative_download', 'alternative_with_titlekey', 'best_alternative']
 csv_fieldnames_3dsdb = ['title_id', 'product_code', 'region_id', 'name', 'publisher', 'region', 'languages', 'size', '3dsdb_id', 'alternative_download', 'alternative_with_titlekey', 'best_alternative']
 csv_fieldnames_titlekeys = ['title_id', 'product_code', 'titlekey_dec', 'titlekey_enc', 'password', 'name', 'region', 'size']
 
@@ -208,6 +210,99 @@ def merge_eshop_content(cn, pc, l):
     return not dup
 
 
+def get_idlist_content(path):
+    # certificate available
+    if not os.path.isfile('ctr-common-1.crt') or not os.path.isfile('ctr-common-1.key'):
+        return
+        
+    # get list of eshop ids from args
+    eshop_ids = []
+    
+    with requests.session() as s:
+        s.verify = False
+        s.cert=('ctr-common-1.crt', 'ctr-common-1.key')
+        
+        count_ok = 0
+        count_tried = 0
+        with open(path, 'r') as fp:
+            for ln in fp:
+                tid = ln.strip().upper()
+                eid = None
+                if len(tid) != 16:
+                    continue
+                count_tried += 1
+                print('Collecting eshop ids: ...', end = '\r')
+                url = urlbase_eid.format(title_id=tid)
+                requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+                with s.get(url) as r:
+                    el = ElementTree.fromstring(r.content)
+                    if el.find('title_id_pairs') is None:
+                        continue
+                    tidpairs = el.find('title_id_pairs')
+                    if tidpairs is None or len(list(tidpairs)) == 0:
+                        continue
+                    for tip in tidpairs:
+                        tid_p = tip.find('title_id').text
+                        if tid_p != tid:
+                            continue
+                        eid = tip.find('ns_uid').text
+                        if eid is not None and not eid in eshop_ids:
+                            count_ok += 1
+                            eshop_ids.append(eid)
+                            print('Collecting eshop ids: ' + tid + ' -> ' + eid, end = '\n')
+                
+    print('Collecting eshop ids: ' + str(count_ok) + ' / ' + str(count_tried) + ' found', end = '\n')
+    if len(eshop_ids) == 0:
+        return
+    
+    # check eshops for title IDs
+    with requests.session() as s:
+        s.verify = False
+
+        for l in langs:
+            print('Checking ' + l + ' eshop content: ...', end = '\r')
+            count_ok = 0
+            count_new = 0
+            offset = 0
+            title_elements = []
+            for eid in eshop_ids:
+                url = urlbase_title.format(lang=l, eshop_id=eid)
+                requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+                
+                # on screen output
+                print('Checking ' + l + ' eshop content: ' + str(count_ok) + ' / ' + str(offset) + ' entries (' + str(count_new) + ' new)', end = '\r')
+                offset += 1
+                
+                # one request per title
+                with s.get(url) as r:
+                    el = ElementTree.fromstring(r.content)
+                    if el.tag != 'eshop':
+                        continue
+                    el.tag = 'content'
+                    el.set('index', str(offset))
+                    tt = el.find('title')
+                    if tt is None:
+                        continue
+                    pc = tt.find('product_code').text
+                    title_elements.append(el)
+
+                    # merge eshope content
+                    if merge_eshop_content(el, pc, l):
+                        count_new += 1
+                    count_ok += 1
+            
+            print('Checking ' + l + ' eshop content: ' + str(count_ok) + ' / ' + str(offset) + ' entries (' + str(count_new) + ' new)', end = '\n')
+            if count_ok > 0:
+                # save to file
+                out = dumpdest + '/contents-eshop-' + l + '.xml'
+                write_eshop_content(title_elements, out)
+
+    # save merged data to file
+    add_eshop_ec_info()
+    out = dumpdest + '/contents-eshop-MERGED.xml'
+    write_eshop_content(merged_eshop_elements, out)
+ 
+
 def get_eshop_content():
     # handle eshop content
     with requests.session() as s:
@@ -220,7 +315,7 @@ def get_eshop_content():
             offset = 0
             title_elements = []
             while True:
-                url = urlbase.format(lang=l, offs=offset)
+                url = urlbase_eshop.format(lang=l, offs=offset)
                 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
                 with s.get(url) as r:
                 # with s.get(url, verify='nintendo-ca-g3.pem') as r:
@@ -499,14 +594,17 @@ def build_eshop_analysis():
             eaw.writerow({'title_id': title_id, 'product_code': pc, 'region_id': rid, 'name': name, 'publisher': pub_name, 'publisher_id': pub_id, 'platform': platform, 'platform_id' : pid, 'genre': genre, 'size': size, 'release_eshop': rel_e, 'release_retail': rel_r, 'eshop_regions': '/'.join(eshop_regs), 'score': score, 'votes': votes, 'titlekey_known': titlekey_known, '3dsdb_id': dbid, 'alternative_download': ' / '.join(eshop_alt), 'alternative_with_titlekey': ' / '.join(eshop_alt_ttk), 'best_alternative': best_alt})
             count_ok += 1
 
-        # append data from 3DSDB
-        with open(csv_missing_3dsdb_from_eshop, encoding='utf-8') as md_csv:
-            mdr = csv.DictReader(md_csv)
-            for r in mdr:
-                print('Merging all entries: ' + str(count_ok) + ' / ' + str(count_all) + ' entries', end = '\r')
-                eaw.writerow({'title_id': r['title_id'], 'product_code': r['product_code'], 'region_id': r['region_id'], 'name': r['name'], 'publisher': r['publisher'], 'platform': platform_dict['18'], 'platform_id': '18', 'size': r['size'], 'release_retail': '3DSDB', '3dsdb_id': r['3dsdb_id'], 'alternative_download': r['alternative_download'], 'alternative_with_titlekey': r['alternative_with_titlekey'], 'best_alternative': r['best_alternative']})
-                count_ok += 1
-                count_all += 1
+        # try append data from 3DSDB
+        try:
+            with open(csv_missing_3dsdb_from_eshop, encoding='utf-8') as md_csv:
+                mdr = csv.DictReader(md_csv)
+                for r in mdr:
+                    print('Merging all entries: ' + str(count_ok) + ' / ' + str(count_all) + ' entries', end = '\r')
+                    eaw.writerow({'title_id': r['title_id'], 'product_code': r['product_code'], 'region_id': r['region_id'], 'name': r['name'], 'publisher': r['publisher'], 'platform': platform_dict['18'], 'platform_id': '18', 'size': r['size'], 'release_retail': '3DSDB', '3dsdb_id': r['3dsdb_id'], 'alternative_download': r['alternative_download'], 'alternative_with_titlekey': r['alternative_with_titlekey'], 'best_alternative': r['best_alternative']})
+                    count_ok += 1
+                    count_all += 1
+        except FileNotFoundError:
+            pass
 
         print('Merging all entries: ' + str(count_ok) + ' / ' + str(count_all) + ' entries', end = '\n')
 
@@ -585,12 +683,15 @@ def analyse_missing():
         print('Unique download titles         :', str(n_unique_downloads))
         if titlekeyurl:
             print('Titles with missing titlekeys  :', str(m_titlekey))
-        print('Titles with no downloads       :', str(m_downloads))
-        print('... and no alt downloads       :', str(m_downloads_alt))
-        print('Missing cartdumps, no download :', str(m_retail_dumps))
+        if m_downloads:
+            print('Titles with no downloads       :', str(m_downloads))
+            print('... and no alt downloads       :', str(m_downloads_alt))
+        if m_retail_dumps:
+            print('Missing cartdumps, no download :', str(m_retail_dumps))
         if titlekeyurl:
             print('No archival from eshop         :', str(m_archive_eshop))
-        print('No archival from eshop or 3dsdb:', str(m_archive_all))
+        if m_archive_all != n_unique_downloads:
+            print('No archival from eshop or 3dsdb:', str(m_archive_all))
 
 
 if __name__ == '__main__':
@@ -599,12 +700,13 @@ if __name__ == '__main__':
 
     # say hello
     print('\n')
-    print('3DS eshop analysis tool (c) 2020')
+    print('3DS eshop analysis tool (c) 2021')
     print('--------------------------------')
 
     # parse arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--region", type=str, help="specify eshop region (english/main/all/XX)")
+    parser.add_argument("-l", "--list", type=str, help="specify a file with titleid list")
     if not titlekeyurl:
         parser.add_argument("-t", "--titlekeyurl", type=str, help="specify titlekey page url (with http://)")
     args = parser.parse_args()
@@ -632,8 +734,11 @@ if __name__ == '__main__':
     if titlekeyurl:
         get_titlekeydb_data()
         dump_titlekeydb()
-    get_3dsdb_content()
-    get_eshop_content()
-    analyse_3dsdb(english_only)
+    if not args.list:
+        get_3dsdb_content()
+        get_eshop_content()
+        analyse_3dsdb(english_only)
+    else:
+        get_idlist_content(args.list)
     build_eshop_analysis()
     analyse_missing()

@@ -18,6 +18,7 @@ urlbase_title = 'https://samurai.wup.eshop.nintendo.net/samurai/ws/{lang}/title/
 urlbase_eid = 'https://ninja.ctr.shop.nintendo.net/ninja/ws/titles/id_pair?title_id[]={title_id}'
 urlbase_ec = 'https://ninja.wup.shop.nintendo.net/ninja/ws/{lang}/title/{eshop_id}/ec_info?shop_id=4&lang=en'
 urlbase_price = 'https://api.ec.nintendo.com/v1/price?ids={eshop_id}&country={lang}&lang=en'
+urlbase_lang = 'https://samurai.wup.eshop.nintendo.net/samurai/ws/{lang}/languages'
 
 dumpdest = 'dumped'
 resultdest = 'results'
@@ -66,6 +67,23 @@ def write_eshop_content(el, out):
     # save to file
     merged = ElementTree.ElementTree(merged_root)
     merged.write(out)
+    
+
+def is_eshop_available(lang):
+    av = True
+    
+    # check availability of eshop
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+    with requests.session() as s:
+        s.verify = False
+        url = urlbase_lang.format(lang=lang)
+        with s.get(url) as r:
+            el = ElementTree.fromstring(r.content)
+            er = el.find('error')
+            if er is not None:
+                av = False
+                
+    return(av)
 
 
 def add_eshop_ec_info():
@@ -333,6 +351,11 @@ def get_idlist_content(path):
             count_new = 0
             offset = 0
             title_elements = []
+            
+            if not is_eshop_available(l):
+                print('Checking ' + l + ' eshop content: not available', end = '\n')
+                continue
+            
             for eid in eshop_ids:
                 url = urlbase_title.format(lang=l, eshop_id=eid)
                 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
